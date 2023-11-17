@@ -1,0 +1,293 @@
+@orange: #fa8c16;
+@colorPrimaryBgHover: #1677ff;
+@blue-2: #bae0ff;
+
+@selected-bg-color: fade(@orange, 25);
+@collapsed-bg-color: fade(@blue-2, 80);
+@hover-bg-color: fade(@orange, 10);
+@thumb-bg-color: fade(@orange, 30);
+
+@collapse-bg-img: repeating-linear-gradient(45deg, @collapsed-bg-color 0px, @collapsed-bg-color 2px, transparent 2px, transparent 6px);
+
+.label-text {
+  display: inline-block;
+  font-style: normal;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 12px;
+  line-height: calc(var(--frame-height) * 1px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.Timeline {
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+
+  .label {
+    .label-text();
+    text-align: center;
+
+    cursor: pointer;
+  }
+
+  > .row-header,
+  > .col-header,
+  > .viewport {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+  }
+
+  > .row-header {
+    > .bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      > .label {
+        position: absolute;
+        width: calc(var(--frame-width) * 1px);
+        line-height: 24px;
+
+        &:hover {
+          background: @hover-bg-color;
+        }
+
+        &.selected {
+          font-weight: bolder;
+          background: @selected-bg-color;
+        }
+      }
+    }
+  }
+
+  > .col-header {
+    > .bar {
+      position: absolute;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+
+      > li {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        height: calc(var(--frame-height) * 1px);
+        cursor: pointer;
+
+        &.collapsed > .label {
+          background: @collapse-bg-img;
+
+          &:hover {
+            background: @collapse-bg-img, @hover-bg-color;
+          }
+
+          &.selected {
+            background: @collapse-bg-img, @selected-bg-color;
+          }
+        }
+
+        &:hover {
+          background: @hover-bg-color;
+        }
+
+        &.selected {
+          font-weight: bolder;
+          background: @selected-bg-color;
+        }
+
+        > .indicator {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 22px;
+          height: 100%;
+
+          fill: none;
+          stroke: #333;
+        }
+
+        > .icon {
+          width: 24px;
+        }
+
+        > .label {
+          text-align: left;
+          flex: 1;
+        }
+      }
+    }
+  }
+
+  > .row-scroll,
+  > .col-scroll {
+    position: absolute;
+
+    background: #f9f9f9;
+    border-radius: 99px;
+    overflow: hidden;
+
+    > .bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      box-sizing: border-box;
+      border: 2px solid #f9f9f9;
+
+      background: #c0c0c0;
+      cursor: pointer;
+      border-radius: 99px;
+
+      &:hover,
+      &.active {
+        background: #7c7c7c;
+      }
+    }
+  }
+
+  > .row-scroll {
+    > .bar {
+      border-left: none;
+      border-right: none;
+    }
+  }
+
+  > .col-scroll {
+    > .bar {
+      border-top: none;
+      border-bottom: none;
+    }
+  }
+
+  .grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+  }
+
+  .cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+
+    > .cursor-x,
+    > .cursor-y {
+      position: absolute;
+      top: 0;
+      left: 0;
+      box-sizing: border-box;
+      background: @selected-bg-color;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .painter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(var(--frame-height) * 1px);
+    box-sizing: border-box;
+
+    &-marker {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 6px;
+      pointer-events: none;
+
+      &.warning {
+        background: repeating-linear-gradient(45deg, rgba(255, 0, 0, 0.3) 0px, rgba(255, 0, 0, 0.3) 2px, transparent 2px, transparent 4px);
+      }
+    }
+
+    &-thumb {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: calc(var(--frame-width) * 1px);
+      height: calc(var(--frame-height) * 0.5px);
+
+      // 斜 45 度斑马纹
+      background-image: @collapse-bg-img;
+    }
+  }
+
+  .frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(var(--frame-width) * 1px);
+    height: calc(var(--frame-height) * 1px);
+    pointer-events: all;
+    box-sizing: border-box;
+
+    &.draggable {
+      cursor: pointer;
+    }
+
+    > .marker {
+      width: 100%;
+      height: calc(var(--frame-height) * 1px);
+
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+
+      pointer-events: none;
+
+      &-line {
+        color: #8c8c8c;
+
+        &::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          width: 100%;
+          height: 4px;
+          transform: translate(0, -50%);
+          background: currentColor;
+        }
+      }
+
+      &-img {
+        width: calc(var(--frame-width) * 1px - 6px);
+        height: calc(var(--frame-height) * 1px - 6px);
+      }
+
+      &-text {
+        .label-text();
+        text-align: center;
+      }
+    }
+  }
+}
