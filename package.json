@@ -13,6 +13,9 @@
     "ci": "prettier --check src && tsc -p tsconfig.json --noEmit",
     "release": "npm run ci && rm -rf dist/* && npm run build && release-it"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "devDependencies": {
     "@parcel/config-default": "^2.10.3",
     "@parcel/packager-ts": "2.10.3",
