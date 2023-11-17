@@ -125,6 +125,7 @@ export const Timeline = <T, K>({
   }));
 
   const handleCursorChange = (c: number) => {
+    if (c < 0) return;
     setCursor(c);
     onCursorChange?.(c);
   };
