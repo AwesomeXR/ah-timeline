@@ -2,11 +2,11 @@
 
 // 上面是 fix: @parcel/transformer-typescript-types: Cannot find module './icon/MinusSquareOutlined.svg' or its corresponding type declarations.
 
-import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import cx from 'classnames';
-import { ITLFrame, ITLRenderingTrack, ITLTrack, ITLTrackMarker } from './type';
+import { ITLFrame, ITLRenderingTrack, ITLTrack } from './type';
 import './style.less';
-import { isEqual, range, set, sortBy } from 'lodash';
+import { isEqual, range } from 'lodash';
 import { FlatTreeHelper } from 'ah-tree-helper';
 import MinusSquareOutlined from './icon/MinusSquareOutlined.svg';
 import PlusSquareOutlined from './icon/PlusSquareOutlined.svg';
@@ -147,19 +147,6 @@ export const Timeline = <T, K>({
     const list: ITLRenderingTrack[] = [];
     let maxOffset = 0;
 
-    const _getAllSubFrames = (track: ITLTrack) => {
-      const frames: ITLFrame[] = [];
-
-      const _walk = (t: ITLTrack) => {
-        frames.push(...t.frames);
-        t.children?.forEach(_walk);
-      };
-
-      track.children?.forEach(_walk);
-
-      return frames;
-    };
-
     const _calcFrameRenderGroups = (track: ITLTrack) => {
       const _groups: ITLRenderingTrack['frameRenderGroups'] = [];
       const _frames = track.frames;
@@ -174,7 +161,7 @@ export const Timeline = <T, K>({
           let _equal = false;
 
           // 只处理 line 类型
-          if (fb && fa.marker.type === 'line' && isEqual(fa.marker, fb.marker) && fa.draggable === fb.draggable) {
+          if (fb && fa.marker.type === 'line' && isEqual(fa.marker, fb.marker) && fa.draggable === fb.draggable && fa.color === fb.color) {
             _equal = true;
           }
 
@@ -185,6 +172,7 @@ export const Timeline = <T, K>({
               span: fb0.offset - fa.offset + 1,
               marker: fa.marker,
               draggable: fa.draggable,
+              color: fa.color,
             });
 
             i = j - 1;
@@ -630,7 +618,8 @@ export const Timeline = <T, K>({
     offset: number,
     span: number,
     marker: ITLFrame['marker'],
-    draggable?: boolean
+    draggable?: boolean,
+    color?: string
   ) => {
     let markerEle: any = null;
 
@@ -644,7 +633,7 @@ export const Timeline = <T, K>({
         data-key={key}
         data-track={track.key}
         className={cx('frame', { draggable })}
-        style={{ left: offset * frameWidth, width: span * frameWidth }}
+        style={{ left: offset * frameWidth, width: span * frameWidth, backgroundColor: color }}
         onDragStart={ev => {
           ev.preventDefault();
           ev.stopPropagation();
@@ -667,7 +656,7 @@ export const Timeline = <T, K>({
         className={cx('track', { collapsed, hasChildren, hasParent })}
         style={{ top: index * frameHeight }}
       >
-        {track.frameRenderGroups.map(d => renderFrame(track, d.key, d.offset, d.span, d.marker, d.draggable))}
+        {track.frameRenderGroups.map(d => renderFrame(track, d.key, d.offset, d.span, d.marker, d.draggable, d.color))}
       </section>
     );
   };

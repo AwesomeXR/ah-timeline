@@ -2,6 +2,7 @@ export type ITLFrame<T = any> = {
   key: string;
   offset: number;
   draggable?: boolean; // 是否可拖拽
+  color?: string; // 帧颜色
   marker: { type: 'img'; img: string } | { type: 'line'; color?: string } | { type: 'text'; text: string };
   data: T;
 };
@@ -25,7 +26,7 @@ export type ITLRenderingTrack<T = any, K = any> = {
   label: string;
 
   level: number;
-  frameRenderGroups: { key: string; offset: number; span: number; marker: ITLFrame['marker']; draggable?: boolean }[]; // 帧分组
+  frameRenderGroups: { key: string; offset: number; span: number; marker: ITLFrame['marker']; draggable?: boolean; color?: string }[]; // 帧分组
   frames: ITLFrame<K>[];
 
   hasChildren?: boolean;

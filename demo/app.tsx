@@ -16,7 +16,17 @@ const App = () => {
     {
       key: '2',
       label: 'Track 2',
-      frames: range(20, 40).map(i => ({ key: i + '', offset: i, marker: { type: 'line' }, data: {} })),
+      frames: [
+        ...range(10, 20).map(i => ({ key: i + '', offset: i, marker: { type: 'line' as 'line', color: 'red' }, data: {} })),
+        ...range(20, 30).map(i => ({ key: i + '', offset: i, marker: { type: 'line' as 'line' }, data: {} })),
+        ...range(30, 40).map(i => ({
+          key: i + '',
+          offset: i,
+          color: 'pink',
+          marker: { type: 'line' as 'line', color: 'green' },
+          data: {},
+        })),
+      ],
       data: {},
       children: [
         {
@@ -60,7 +70,6 @@ const App = () => {
     {
       key: '5',
       label: 'Track 5',
-      markers: [{ type: 'warning', start: 5, end: 10 }],
       frames: range(1, 30).map(i => ({ key: i + '', offset: i, marker: { type: 'text', text: i + '' }, data: {} })),
       data: {},
     },
