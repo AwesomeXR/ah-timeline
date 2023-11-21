@@ -14,8 +14,6 @@ export type ITLTrack<T = any, K = any> = {
   frames: ITLFrame<K>[];
   data: T;
 
-  markers?: ITLTrackMarker[];
-
   children?: ITLTrack[]; // 子 track
 };
 
@@ -29,10 +27,8 @@ export type ITLRenderingTrack<T = any, K = any> = {
   level: number;
   frameRenderGroups: { key: string; offset: number; span: number; marker: ITLFrame['marker']; draggable?: boolean }[]; // 帧分组
   frames: ITLFrame<K>[];
-  markers: ITLTrackMarker[];
 
   hasChildren?: boolean;
-  thumbs?: { range: number[] }[]; // 缩略图
 
   raw: ITLTrack<T, K>;
 };

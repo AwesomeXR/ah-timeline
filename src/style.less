@@ -215,29 +215,6 @@
     width: 100%;
     height: calc(var(--frame-height) * 1px);
     box-sizing: border-box;
-
-    &-marker {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 6px;
-      pointer-events: none;
-
-      &.warning {
-        background: repeating-linear-gradient(45deg, rgba(255, 0, 0, 0.3) 0px, rgba(255, 0, 0, 0.3) 2px, transparent 2px, transparent 4px);
-      }
-    }
-
-    &-thumb {
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: calc(var(--frame-width) * 1px);
-      height: calc(var(--frame-height) * 0.5px);
-
-      // 斜 45 度斑马纹
-      background-image: @collapse-bg-img;
-    }
   }
 
   .frame {

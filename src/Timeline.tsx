@@ -160,30 +160,6 @@ export const Timeline = <T, K>({
       return frames;
     };
 
-    const _calcThumbs = (track: ITLTrack) => {
-      const _subFrames = _getAllSubFrames(track);
-      const _offsets = sortBy([...new Set<number>(_subFrames.map(f => f.offset))]);
-      const _thumbs: NonNullable<ITLRenderingTrack['thumbs']> = [];
-
-      // 计算 range
-      for (let i = 0; i < _offsets.length; i++) {
-        const oa = _offsets[i];
-
-        for (let j = i + 1; j <= _offsets.length; j++) {
-          const ob0 = _offsets[j - 1];
-          const ob = _offsets[j] as number | undefined;
-
-          if (!ob || 1 < ob - ob0) {
-            _thumbs.push({ range: [oa, ob0] });
-            i = j - 1;
-            break;
-          }
-        }
-      }
-
-      return _thumbs;
-    };
-
     const _calcFrameRenderGroups = (track: ITLTrack) => {
       const _groups: ITLRenderingTrack['frameRenderGroups'] = [];
       const _frames = track.frames;
@@ -230,10 +206,8 @@ export const Timeline = <T, K>({
         label: track.label,
         hasChildren,
         level,
-        thumbs: _calcThumbs(track),
         frameRenderGroups: _calcFrameRenderGroups(track),
         frames: track.frames,
-        markers: track.markers || [],
         raw: track,
       };
       list.push(rt);
@@ -681,16 +655,6 @@ export const Timeline = <T, K>({
     );
   };
 
-  const renderTrackMarker = (marker: ITLTrackMarker, index: number) => {
-    return (
-      <div
-        key={index}
-        className={cx('track-marker', marker.type)}
-        style={{ left: marker.start * frameWidth, width: (marker.end - marker.start + 1) * frameWidth }}
-      />
-    );
-  };
-
   const renderTrack = (track: ITLRenderingTrack<any, any>, index: number) => {
     const hasChildren = !!track.hasChildren;
     const hasParent = !!track.parentId;
@@ -703,15 +667,6 @@ export const Timeline = <T, K>({
         className={cx('track', { collapsed, hasChildren, hasParent })}
         style={{ top: index * frameHeight }}
       >
-        {track.markers.map(renderTrackMarker)}
-        {track.thumbs?.map((n, i) => (
-          <i
-            key={i}
-            className='track-thumb'
-            data-range={n.range.join('-')}
-            style={{ left: n.range[0] * frameWidth, width: (n.range[1] - n.range[0] + 1) * frameWidth }}
-          ></i>
-        ))}
         {track.frameRenderGroups.map(d => renderFrame(track, d.key, d.offset, d.span, d.marker, d.draggable))}
       </section>
     );
