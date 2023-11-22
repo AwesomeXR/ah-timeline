@@ -1,13 +1,7 @@
-@orange: #fa8c16;
-@colorPrimaryBgHover: #1677ff;
-@blue-2: #bae0ff;
+@cursor-color: fade(#fa8c16, 60);
 
-@selected-bg-color: fade(@orange, 25);
-@collapsed-bg-color: fade(@blue-2, 80);
-@hover-bg-color: fade(@orange, 10);
-@thumb-bg-color: fade(@orange, 30);
-
-@collapse-bg-img: repeating-linear-gradient(45deg, @collapsed-bg-color 0px, @collapsed-bg-color 2px, transparent 2px, transparent 6px);
+@level-colors: fade(#91caff, 20), fade(#95de64, 20), fade(#5cdbd3, 20), fade(#d3f261, 20);
+@level-selected-colors: fade(#91caff, 80), fade(#95de64, 80), fade(#5cdbd3, 80), fade(#d3f261, 80);
 
 .label-text {
   display: inline-block;
@@ -18,6 +12,22 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+// 将 @level-colors 展开成 .level-0, .level-1, ...
+.each-level(@level, @amount) when (@level >= 0) {
+  .level-@{level} {
+    background-color: fade(extract(@level-colors, @level + 1), alpha(extract(@level-colors, @level + 1)) * @amount); // extract 从 1 开始
+
+    &.selected {
+      background-color: fade(extract(@level-selected-colors, @level + 1), alpha(extract(@level-selected-colors, @level + 1)) * @amount);
+    }
+  }
+  .each-level(@level - 1, @amount);
+}
+
+.spread-level(@amount) {
+  .each-level(length(@level-colors) - 1, @amount);
 }
 
 .Timeline {
@@ -54,19 +64,27 @@
         width: calc(var(--frame-width) * 1px);
         line-height: 24px;
 
+        &:hover,
+        &.selected {
+          text-overflow: unset;
+          overflow: visible;
+        }
+
         &:hover {
-          background: @hover-bg-color;
+          text-decoration: underline;
         }
 
         &.selected {
           font-weight: bolder;
-          background: @selected-bg-color;
+          background: @cursor-color;
         }
       }
     }
   }
 
   > .col-header {
+    .spread-level(100);
+
     > .bar {
       position: absolute;
       list-style: none;
@@ -82,25 +100,21 @@
         height: calc(var(--frame-height) * 1px);
         cursor: pointer;
 
-        &.collapsed > .label {
-          background: @collapse-bg-img;
+        box-sizing: border-box;
+        border: 1px solid #fff;
 
-          &:hover {
-            background: @collapse-bg-img, @hover-bg-color;
-          }
-
-          &.selected {
-            background: @collapse-bg-img, @selected-bg-color;
+        &.collapsed {
+          > .icon {
+            transform: rotate(0deg);
           }
         }
 
         &:hover {
-          background: @hover-bg-color;
+          text-decoration: underline;
         }
 
         &.selected {
           font-weight: bolder;
-          background: @selected-bg-color;
         }
 
         > .indicator {
@@ -116,6 +130,8 @@
 
         > .icon {
           width: 24px;
+          transform: rotate(90deg);
+          transition: transform 0.1s ease-in-out;
         }
 
         > .label {
@@ -187,13 +203,12 @@
     height: 100%;
     pointer-events: none;
 
-    > .cursor-x,
-    > .cursor-y {
+    > .cursor-x {
       position: absolute;
       top: 0;
       left: 0;
       box-sizing: border-box;
-      background: @selected-bg-color;
+      background: @cursor-color;
       width: 100%;
       height: 100%;
     }
@@ -206,6 +221,8 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
+
+    .spread-level(40);
   }
 
   .track {
@@ -215,6 +232,9 @@
     width: 100%;
     height: calc(var(--frame-height) * 1px);
     box-sizing: border-box;
+
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
   }
 
   .frame {

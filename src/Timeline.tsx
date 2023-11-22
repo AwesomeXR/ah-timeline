@@ -8,8 +8,7 @@ import { ITLFrame, ITLRenderingTrack, ITLTrack } from './type';
 import './style.less';
 import { isEqual, range } from 'lodash';
 import { FlatTreeHelper } from 'ah-tree-helper';
-import MinusSquareOutlined from './icon/MinusSquareOutlined.svg';
-import PlusSquareOutlined from './icon/PlusSquareOutlined.svg';
+import CaretRightOutlined from './icon/CaretRightOutlined.svg';
 
 type ITLTrack2 = ITLTrack & { id: string; parentId?: string };
 
@@ -40,6 +39,7 @@ export interface ITimelineProps<T = any, K = any> {
   onExpandedTracksChange?: (tracks: string[]) => any;
 
   autoExpand?: boolean;
+  defaultColHeaderWidth?: number;
 
   onFrameDragStart?: (info: { track: ITLTrack<T, K>; frame: ITLFrame<T>; startOffset: number }) => any;
   onFrameDrag?: (info: { track: ITLTrack<T, K>; frame: ITLFrame<T>; startOffset: number; movement: number }) => any;
@@ -52,15 +52,15 @@ export interface ITimelineProps<T = any, K = any> {
   onCursorDragEnd?: (info: {}) => any;
 }
 
-const calcGridBackground = (fw: number, fh: number, x: number, y: number): React.CSSProperties => {
-  const color1 = '#d9d9d9';
-  const color2 = '#f5f5f5';
+const calcGridBackground = (ch: number, fw: number, fh: number, x: number, y: number): React.CSSProperties => {
+  const cc1 = '#595959'; // x 轴大刻度
+  const cc2 = '#d9d9d9';
+  const cr = '#f5f5f5';
 
   const background = `
-repeating-linear-gradient(to right, ${color1} ${-x}px, ${color1} ${1 - x}px, transparent ${1 - x}px, transparent ${fw - x}px),
-repeating-linear-gradient(to bottom, ${color1} ${-y}px, ${color1} ${1 - y}px, transparent ${1 - y}px, transparent ${fh - y}px),
-repeating-linear-gradient(to bottom, ${color2} ${-y}px, ${color2} ${fh - y}px, transparent ${fh - y}px, transparent ${fh * 2 - y}px)
-  `;
+repeating-linear-gradient(to right, ${cc1} ${-x}px, ${cc1} ${1 - x}px, transparent ${1 - x}px, transparent ${fw * 10 - x}px),
+repeating-linear-gradient(to right, ${cc2} ${-x}px, ${cc2} ${1 - x}px, transparent ${1 - x}px, transparent ${fw * 5 - x}px)
+    `;
 
   return { background };
 };
@@ -83,6 +83,7 @@ export const Timeline = <T, K>({
   expandedTracks: expandedTracks0,
   defaultExpandedTracks,
   onExpandedTracksChange,
+  defaultColHeaderWidth,
 
   onCursorDragStart = EMPTY_FN,
   onCursorDrag = EMPTY_FN,
@@ -104,7 +105,7 @@ export const Timeline = <T, K>({
 
   const [selectedTrack, setSelectedTrack] = useState<string | undefined>(selectedTrack0 || defaultSelectedTrack || '');
   const [expandedTracks, setExpandedTracks] = useState<string[]>(expandedTracks0 || defaultExpandedTracks || []);
-  const [colHeaderWidth] = useState<number>(96);
+  const [colHeaderWidth] = useState<number>(defaultColHeaderWidth || 96);
 
   // 对外暴露 ref 方法
   useImperativeHandle<ITimelineRef, ITimelineRef>(_ref, () => ({
@@ -141,6 +142,8 @@ export const Timeline = <T, K>({
   };
 
   const scrollBarSize = 12;
+  const xExpandCnt = 5;
+  const yExpandCnt = 5;
 
   // 构建渲染树
   const { rTree, maxOffset } = useMemo(() => {
@@ -241,9 +244,15 @@ export const Timeline = <T, K>({
     top: rowHeaderBox.height,
   };
 
-  const contentBox = {
+  const contentBox0 = {
     width: Math.max((maxOffset + 1) * frameWidth, viewportBox.width),
     height: Math.max(rTree.list.length * frameHeight, viewportBox.height),
+  };
+
+  const contentBox = {
+    ...contentBox0,
+    width: contentBox0.width + xExpandCnt * frameWidth,
+    height: contentBox0.height + yExpandCnt * frameHeight,
   };
   const rowScrollBox = { width: viewportBox.width, height: scrollBarSize, left: colHeaderBox.width, top: height - scrollBarSize };
   const colScrollBox = { width: scrollBarSize, height: viewportBox.height, left: width - scrollBarSize, top: rowHeaderBox.height };
@@ -523,11 +532,11 @@ export const Timeline = <T, K>({
     return (
       <div className='row-header' onMouseDown={handleRowHeaderMouseDown} style={{ ...rowHeaderBox }}>
         <div className='bar' style={{ transform: scrollTransformX }}>
-          {range(0, maxOffset + 1).map(offset => {
+          {range(0, maxOffset + xExpandCnt + 1).map(offset => {
             const _isSelected = offset === cursor;
 
             return (
-              <i key={offset} className={cx('label', { selected: _isSelected })} style={{ left: offset * frameWidth }}>
+              <i key={offset} className={cx('label', { selected: _isSelected })} title={offset + ''} style={{ left: offset * frameWidth }}>
                 {offset}
               </i>
             );
@@ -557,25 +566,14 @@ export const Timeline = <T, K>({
             const hasChildren = !!t.hasChildren;
 
             const iconEle = t.hasChildren ? (
-              _isExpanded ? (
-                <MinusSquareOutlined
-                  className='icon'
-                  onMouseDown={(ev: any) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    toggleExpand(t.key, false);
-                  }}
-                />
-              ) : (
-                <PlusSquareOutlined
-                  className='icon'
-                  onMouseDown={(ev: any) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    toggleExpand(t.key, true);
-                  }}
-                />
-              )
+              <CaretRightOutlined
+                className='icon'
+                onMouseDown={(ev: any) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  toggleExpand(t.key, !_isExpanded);
+                }}
+              />
             ) : (
               <i className='icon' />
             );
@@ -583,7 +581,7 @@ export const Timeline = <T, K>({
             return (
               <li
                 key={t.id}
-                className={cx({ selected: _isSelected, collapsed: !_isExpanded && hasChildren, hasParent })}
+                className={cx(`level-${t.level}`, { selected: _isSelected, collapsed: !_isExpanded && hasChildren, hasParent })}
                 style={{ paddingLeft: t.level * 22 }}
               >
                 {hasParent && (
@@ -648,12 +646,13 @@ export const Timeline = <T, K>({
     const hasChildren = !!track.hasChildren;
     const hasParent = !!track.parentId;
     const collapsed = !expandedTracks.includes(track.id) && track.hasChildren;
+    const selected = selectedTrack === track.key;
 
     return (
       <section
         key={track.key}
         data-key={track.key}
-        className={cx('track', { collapsed, hasChildren, hasParent })}
+        className={cx('track', `level-${track.level}`, { selected, collapsed, hasChildren, hasParent })}
         style={{ top: index * frameHeight }}
       >
         {track.frameRenderGroups.map(d => renderFrame(track, d.key, d.offset, d.span, d.marker, d.draggable, d.color))}
@@ -672,10 +671,9 @@ export const Timeline = <T, K>({
         }}
         style={{ ...viewportBox }}
       >
-        <div className='grid' style={{ ...calcGridBackground(frameWidth, frameHeight, offsetX, offsetY) }} />
+        <div className='grid' style={{ ...calcGridBackground(contentBox0.height, frameWidth, frameHeight, offsetX, offsetY) }} />
         <div className='cursor'>
           <div className='cursor-x' style={{ left: cursor * frameWidth, width: frameWidth, transform: scrollTransformX }} />
-          <div className='cursor-y' style={{ top: sTrackIndex * frameHeight, height: frameHeight, transform: scrollTransformY }} />
         </div>
         <div className='painter' style={{ ...contentBox, transform: scrollTransformXY }}>
           {rTree.list.map(renderTrack)}

@@ -87,7 +87,7 @@ const App = () => {
         <button onClick={() => ref.current.scrollIntoViewIfNeeded()}>Focus</button>
       </header>
 
-      <Timeline _ref={ref} width={window.innerWidth - 100} height={window.innerHeight - 100} tracks={tracks} />
+      <Timeline _ref={ref} width={window.innerWidth - 100} height={window.innerHeight - 100} tracks={tracks} defaultColHeaderWidth={130} />
     </div>
   );
 };
