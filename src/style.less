@@ -42,6 +42,24 @@
     cursor: pointer;
   }
 
+  > .t-header {
+    > input {
+      display: inline-block;
+      width: calc(100% - 2px);
+      height: calc(100% - 4px);
+      margin: 2px 0 2px 2px;
+      box-sizing: border-box;
+
+      &::placeholder {
+        font-size: 12px;
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
   > .row-header,
   > .col-header,
   > .viewport {

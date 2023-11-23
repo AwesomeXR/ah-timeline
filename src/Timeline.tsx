@@ -6,9 +6,10 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef
 import cx from 'classnames';
 import { ITLFrame, ITLRenderingTrack, ITLTrack } from './type';
 import './style.less';
-import { isEqual, range } from 'lodash';
+import { chain, isEqual, range } from 'lodash';
 import { FlatTreeHelper } from 'ah-tree-helper';
 import CaretRightOutlined from './icon/CaretRightOutlined.svg';
+import { HighlightText } from './HighlightText';
 
 type ITLTrack2 = ITLTrack & { id: string; parentId?: string };
 
@@ -97,6 +98,8 @@ export const Timeline = <T, K>({
 }: ITimelineProps<T, K>) => {
   const container = useRef<HTMLDivElement>(null);
 
+  const [searchText, setSearchText] = useState<string>('');
+
   const [cursor, setCursor] = useState<number>(cursor0 ?? defaultCursor ?? 0);
   const [offsetX, setOffsetX] = useState<number>(0);
   const [offsetY, setOffsetY] = useState<number>(0);
@@ -145,8 +148,8 @@ export const Timeline = <T, K>({
   const xExpandCnt = 5;
   const yExpandCnt = 5;
 
-  // 构建渲染树
-  const { rTree, maxOffset } = useMemo(() => {
+  // 构建渲染树0
+  const { rTree: rTree0, maxOffset } = useMemo(() => {
     const list: ITLRenderingTrack[] = [];
     let maxOffset = 0;
 
@@ -219,6 +222,24 @@ export const Timeline = <T, K>({
     return { rTree, maxOffset };
   }, [tracks, expandedTracks]);
 
+  // 构建搜索后的渲染树
+  const rTree = useMemo(() => {
+    if (!searchText) return rTree0;
+
+    const q = searchText.toLowerCase();
+
+    const list = rTree0
+      .findAllRoot()
+      .map(rt => {
+        return FlatTreeHelper.reduceTraceList(
+          rTree0.getAllTraceList(rt.id).filter(_ts => _ts.some(_t => _t.label.toLowerCase().includes(q)))
+        );
+      })
+      .flat();
+
+    return new FlatTreeHelper(list);
+  }, [rTree0, searchText]);
+
   // 构建全量树
   const { fTree } = useMemo(() => {
     const list = [] as ITLTrack2[];
@@ -234,7 +255,9 @@ export const Timeline = <T, K>({
     return { fTree };
   }, [tracks]);
 
-  const rowHeaderBox = { width: width - colHeaderWidth, height: 24, left: colHeaderWidth, top: 0 };
+  const tHeaderBox = { width: colHeaderWidth, height: 24, left: 0, top: 0 };
+
+  const rowHeaderBox = { width: width - colHeaderWidth, height: tHeaderBox.height, left: colHeaderWidth, top: 0 };
   const colHeaderBox = { width: colHeaderWidth, height: height - rowHeaderBox.height, left: 0, top: rowHeaderBox.height };
 
   const viewportBox = {
@@ -528,6 +551,14 @@ export const Timeline = <T, K>({
     }
   };
 
+  const renderTHeader = () => {
+    return (
+      <div className='t-header' style={{ ...tHeaderBox }}>
+        <input type='text' placeholder='输入以筛选...' value={searchText} onChange={ev => setSearchText(ev.target.value)} />
+      </div>
+    );
+  };
+
   const renderRowHeader = () => {
     let _rangeB = Math.max(maxOffset + xExpandCnt + 1, Math.ceil(contentBox.width / frameWidth));
 
@@ -593,9 +624,7 @@ export const Timeline = <T, K>({
                 )}
 
                 {iconEle}
-                <i className='label' title={t.label}>
-                  {t.label}
-                </i>
+                <HighlightText className='label' text={t.label} highlight={searchText} />
               </li>
             );
           })}
@@ -690,6 +719,7 @@ export const Timeline = <T, K>({
       className={cx('Timeline', className)}
       style={{ width, height, '--frame-width': frameWidth, '--frame-height': frameHeight } as any}
     >
+      {renderTHeader()}
       {renderRowHeader()}
       {renderRowScrollbar()}
       {renderColHeader()}
@@ -698,7 +728,3 @@ export const Timeline = <T, K>({
     </div>
   );
 };
-
-function isPointInRect(x: number, y: number, rect: { x: number; y: number; width: number; height: number }) {
-  return x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height;
-}
