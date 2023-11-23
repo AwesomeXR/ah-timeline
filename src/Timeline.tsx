@@ -6,7 +6,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef
 import cx from 'classnames';
 import { ITLFrame, ITLRenderingTrack, ITLTrack } from './type';
 import './style.less';
-import { chain, isEqual, range } from 'lodash';
+import { chain, flatten, isEqual, range } from 'lodash';
 import { FlatTreeHelper } from 'ah-tree-helper';
 import CaretRightOutlined from './icon/CaretRightOutlined.svg';
 import { HighlightText } from './HighlightText';
@@ -228,14 +228,13 @@ export const Timeline = <T, K>({
 
     const q = searchText.toLowerCase();
 
-    const list = rTree0
-      .findAllRoot()
-      .map(rt => {
+    const list = flatten(
+      rTree0.findAllRoot().map(rt => {
         return FlatTreeHelper.reduceTraceList(
           rTree0.getAllTraceList(rt.id).filter(_ts => _ts.some(_t => _t.label.toLowerCase().includes(q)))
         );
       })
-      .flat();
+    );
 
     return new FlatTreeHelper(list);
   }, [rTree0, searchText]);
