@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import cx from 'classnames';
-import { escapeRegExp } from 'lodash';
+import { escapeRegExp, flatten } from 'lodash';
 
 export interface IHighlightTextProps {
   className?: string;
@@ -23,14 +23,13 @@ export const HighlightText = ({ className, style, text, highlight }: IHighlightT
     const segs = text.split(reg);
 
     const _eleList = [
-      ...segs
-        .slice(0, segs.length - 1)
-        .map((s, i) => {
+      ...flatten(
+        segs.slice(0, segs.length - 1).map((s, i) => {
           const _m = <mark key={'m' + i}>{_highlight}</mark>;
           if (!s) return [_m];
           return [<span key={'s' + i}>{s}</span>, _m];
         })
-        .flat(),
+      ),
       <span key={'s' + (segs.length - 1)}>{segs[segs.length - 1]}</span>,
     ];
 
