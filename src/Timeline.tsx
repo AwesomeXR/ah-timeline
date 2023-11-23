@@ -529,10 +529,12 @@ export const Timeline = <T, K>({
   };
 
   const renderRowHeader = () => {
+    let _rangeB = Math.max(maxOffset + xExpandCnt + 1, Math.ceil(contentBox.width / frameWidth));
+
     return (
       <div className='row-header' onMouseDown={handleRowHeaderMouseDown} style={{ ...rowHeaderBox }}>
         <div className='bar' style={{ transform: scrollTransformX }}>
-          {range(0, maxOffset + xExpandCnt + 1).map(offset => {
+          {range(0, _rangeB).map(offset => {
             const _isSelected = offset === cursor;
 
             return (

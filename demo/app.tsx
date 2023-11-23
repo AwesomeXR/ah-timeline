@@ -1,12 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ITLTrack, ITimelineRef, Timeline } from '../src';
 import { range } from 'lodash';
 
-const App = () => {
-  const ref = React.useRef<ITimelineRef>({} as any);
-
-  const tracks: ITLTrack[] = [
+const Datasource: Record<'Default' | 'Zero', ITLTrack[]> = {
+  Default: [
     {
       key: '1',
       label: 'Track 1',
@@ -79,11 +77,35 @@ const App = () => {
       frames: range(10, 20).map(i => ({ key: i + '', offset: i, marker: { type: 'line' as 'line' }, data: {} })),
       data: {},
     })),
-  ];
+  ],
+  Zero: [],
+};
+
+const App = () => {
+  const ref = React.useRef<ITimelineRef>({} as any);
+  const [dataName, setDataName] = useState<keyof typeof Datasource>('Default');
+
+  const tracks = Datasource[dataName];
 
   return (
     <div>
-      <header style={{ display: 'flex', height: 64, alignItems: 'center' }}>
+      <header style={{ display: 'flex', height: 64, alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {Object.keys(Datasource).map(name => (
+            <span key={name}>
+              <input
+                type='radio'
+                name='dataName'
+                id={name}
+                value={name}
+                checked={name === dataName}
+                onChange={() => setDataName(name as any)}
+              />
+              <label htmlFor={name}>{name}</label>
+            </span>
+          ))}
+        </div>
+
         <button onClick={() => ref.current.scrollIntoViewIfNeeded()}>Focus</button>
       </header>
 
