@@ -15,7 +15,14 @@ const Datasource: Record<'Default' | 'Zero', ITLTrack[]> = {
       key: '2',
       label: 'Track 2',
       frames: [
-        ...range(10, 20).map(i => ({ key: i + '', offset: i, marker: { type: 'line' as 'line', color: 'red' }, data: {} })),
+        ...range(0, 10).map(i => ({
+          key: i + '',
+          offset: i,
+          marker: { type: 'line' as 'line', color: 'transparent' },
+          color: '#69b1ff',
+          data: {},
+        })),
+        ...range(10, 20).map(i => ({ key: i + '', offset: i, marker: { type: 'line' as 'line', color: 'red' }, color: '#13c2c2', data: {} })),
         ...range(20, 30).map(i => ({ key: i + '', offset: i, marker: { type: 'line' as 'line' }, data: {} })),
         ...range(30, 40).map(i => ({
           key: i + '',
